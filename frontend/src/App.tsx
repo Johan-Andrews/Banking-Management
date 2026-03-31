@@ -28,9 +28,11 @@ function App() {
           <Route path="/register" element={<Register />} />
         </Route>
 
+        {/* Root Redirect */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
         {/* Customer Portal */}
         <Route element={<DashboardLayout />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/transfer" element={<Transfer />} />
           <Route path="/beneficiaries" element={<Beneficiaries />} />

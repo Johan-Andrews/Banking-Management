@@ -5,7 +5,8 @@ import { CreditCard, PlusCircle, CheckCircle2, Sparkles, Landmark } from 'lucide
 import { useNavigate } from 'react-router-dom';
 
 export default function Accounts() {
-  const { customerId } = useAuth();
+  const { user } = useAuth();
+  const customerId = user?.id;
   const navigate = useNavigate();
   const [accountType, setAccountType] = useState('');
   const [loading, setLoading] = useState(false);

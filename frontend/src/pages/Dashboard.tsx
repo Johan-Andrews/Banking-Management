@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { Wallet, TrendingUp, ArrowDownRight, ArrowUpRight, CreditCard, BadgeDollarSign, FileText } from 'lucide-react';
 
 export default function Dashboard() {
-  const { customerId } = useAuth();
+  const { user } = useAuth();
+  const customerId = user?.id;
   const [accounts, setAccounts] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loanCount, setLoanCount] = useState(0);
@@ -13,30 +14,35 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function loadDashboard() {
-      const { data: custData } = await supabase
-        .from('customer').select('name').eq('customer_id', customerId).single();
-      if (custData) setCustomerName(custData.name);
+      try {
+        const { data: custData } = await supabase
+          .from('customer').select('name').eq('customer_id', customerId).single();
+        if (custData) setCustomerName(custData.name);
 
-      const { data: accData } = await supabase
-        .from('account').select('*').eq('customer_id', customerId);
-      if (accData) setAccounts(accData);
+        const { data: accData } = await supabase
+          .from('account').select('*, branch:branch_id (branch_name)').eq('customer_id', customerId);
+        if (accData) setAccounts(accData);
 
-      // Loan count
-      const { count } = await supabase
-        .from('loan').select('*', { count: 'exact', head: true })
-        .eq('customer_id', customerId).in('status', ['Pending', 'Approved']);
-      setLoanCount(count || 0);
+        // Loan count
+        const { count } = await supabase
+          .from('loan').select('*', { count: 'exact', head: true })
+          .eq('customer_id', customerId).in('status', ['Pending', 'Approved']);
+        setLoanCount(count || 0);
 
-      // Recent transactions
-      if (accData && accData.length > 0) {
-        const accountIds = accData.map(a => a.account_id);
-        const { data: txData } = await supabase
-          .from('transaction').select('*')
-          .or(`from_account_id.in.(${accountIds.join(',')}),to_account_id.in.(${accountIds.join(',')})`)
-          .order('timestamp', { ascending: false }).limit(10);
-        if (txData) setTransactions(txData);
+        // Recent transactions
+        if (accData && accData.length > 0) {
+          const accountIds = accData.map(a => a.account_id);
+          const { data: txData } = await supabase
+            .from('transaction').select('*, from_account:from_account_id(account_number), to_account:to_account_id(account_number), beneficiary:beneficiary_id(payee_name)')
+            .or(`from_account_id.in.(${accountIds.join(',')}),to_account_id.in.(${accountIds.join(',')})`)
+            .order('timestamp', { ascending: false }).limit(10);
+          if (txData) setTransactions(txData);
+        }
+      } catch (err) {
+        console.error("Failed to load dashboard data:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     if (customerId) loadDashboard();
   }, [customerId]);
@@ -117,14 +123,14 @@ export default function Dashboard() {
           }}>
             <div className="flex-between" style={{ marginBottom: '12px' }}>
               <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>
-                {acc.account_type} Account
+                {acc.account_type} Account {acc.branch?.branch_name ? `• ${acc.branch.branch_name} Branch` : ''}
               </span>
               <span className={`badge ${acc.status === 'Active' ? 'success' : acc.status === 'Frozen' ? 'danger' : 'neutral'}`}>
                 {acc.status}
               </span>
             </div>
             <h3 className="text-mono" style={{ fontSize: '1.1rem', letterSpacing: '2.5px', marginBottom: '12px', color: 'var(--text-secondary)' }}>
-              {acc.account_number.match(/.{1,4}/g)?.join(' ')}
+              {acc.account_number?.match(/.{1,4}/g)?.join(' ') || 'N/A'}
             </h3>
             <div style={{ fontSize: '1.6rem', fontWeight: 700 }}>
               ₹{fmt(Number(acc.balance))}
@@ -152,10 +158,11 @@ export default function Dashboard() {
             <thead>
               <tr>
                 <th>Date & Time</th>
-                <th>Ref Number</th>
+                <th>From / To</th>
                 <th>Type</th>
                 <th>Amount</th>
                 <th>Status</th>
+                <th>Ref Number</th>
               </tr>
             </thead>
             <tbody>
@@ -166,7 +173,12 @@ export default function Dashboard() {
                     <td style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
                       {new Date(tx.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </td>
-                    <td className="text-mono" style={{ fontSize: '0.82rem' }}>{tx.transaction_ref}</td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.82rem' }}>
+                        <span style={{ color: 'var(--text-secondary)' }}>From: <span className="text-mono" style={{ color: 'var(--text-primary)' }}>{tx.from_account?.account_number || 'Cash/System'}</span></span>
+                        <span style={{ color: 'var(--text-secondary)' }}>To: <span className="text-mono" style={{ color: 'var(--text-primary)' }}>{tx.to_account?.account_number || tx.beneficiary?.payee_name || 'Cash/System'}</span></span>
+                      </div>
+                    </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {isDebit
@@ -183,6 +195,7 @@ export default function Dashboard() {
                         {tx.status}
                       </span>
                     </td>
+                    <td className="text-mono" style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)' }}>{tx.transaction_ref}</td>
                   </tr>
                 );
               })}

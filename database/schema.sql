@@ -56,16 +56,17 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Account
+-- Account (supports both internal & external inter-bank accounts)
 CREATE TABLE IF NOT EXISTS account (
     account_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     account_number VARCHAR(20) UNIQUE NOT NULL,
-    account_type VARCHAR(20) NOT NULL CHECK (account_type IN ('Savings', 'Current')),
-    balance DECIMAL(15, 2) NOT NULL DEFAULT 0.00 CHECK (balance >= 0),
+    account_type VARCHAR(20) CHECK (account_type IN ('Savings', 'Current')),
+    balance DECIMAL(15, 2) DEFAULT 0.00 CHECK (balance >= 0),
     branch_id UUID REFERENCES branch(branch_id),
     customer_id UUID REFERENCES customer(customer_id) ON DELETE CASCADE,
     status VARCHAR(20) DEFAULT 'Active' CHECK (status IN ('Active', 'Frozen', 'Closed')),
-    daily_transaction_limit DECIMAL(15, 2) DEFAULT 50000.00
+    daily_transaction_limit DECIMAL(15, 2) DEFAULT 50000.00,
+    is_external BOOLEAN DEFAULT FALSE
 );
 
 -- Beneficiary
@@ -143,7 +144,6 @@ DECLARE
     v_from_status VARCHAR(20);
     v_daily_limit DECIMAL(15, 2);
     v_today_transferred DECIMAL(15, 2);
-    v_ben_created_at TIMESTAMP;
     v_ben_daily_limit DECIMAL(15, 2);
 BEGIN
     -- Only process completed transactions
@@ -185,13 +185,8 @@ BEGIN
 
         -- Beneficiary checks
         IF NEW.type = 'Transfer' AND NEW.beneficiary_id IS NOT NULL THEN
-            SELECT created_at, daily_transfer_limit INTO v_ben_created_at, v_ben_daily_limit
+            SELECT daily_transfer_limit INTO v_ben_daily_limit
             FROM beneficiary WHERE beneficiary_id = NEW.beneficiary_id;
-
-            -- Cooling Period (24h)
-            IF NOW() < (v_ben_created_at + INTERVAL '24 hours') THEN
-                RAISE EXCEPTION 'Beneficiary is in cooling period (24 hours).';
-            END IF;
 
             -- Beneficiary Daily Limit
             SELECT COALESCE(SUM(amount), 0) INTO v_today_transferred

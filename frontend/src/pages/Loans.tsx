@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { FileText, Calendar, Calculator, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function Loans() {
-  const { customerId } = useAuth();
+  const { user } = useAuth();
+  const customerId = user?.id;
   const [loans, setLoans] = useState<any[]>([]);
   const [schedules, setSchedules] = useState<any[]>([]);
 

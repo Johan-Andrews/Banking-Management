@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { UserPlus, Clock, Trash2, Users, AlertCircle } from 'lucide-react';
 
 export default function Beneficiaries() {
-  const { customerId } = useAuth();
+  const { user } = useAuth();
+  const customerId = user?.id;
   const [bens, setBens] = useState<any[]>([]);
 
   const [name, setName] = useState('');

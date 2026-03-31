@@ -2,7 +2,7 @@ import { Navigate, Outlet, Link, useNavigate, useLocation } from 'react-router-d
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard, Users, UserCog, ArrowLeftRight, CreditCard,
-  FileText, ScrollText, DollarSign, LogOut, ArrowLeft, Shield
+  FileText, ScrollText, DollarSign, LogOut, Shield
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -62,16 +62,6 @@ export default function AdminLayout() {
               </Link>
             );
           })}
-
-          {user.role === 'admin' && (
-            <>
-              <span className="sidebar-section-label">Portal</span>
-              <Link to="/dashboard" className="nav-item">
-                <ArrowLeft size={19} />
-                Customer View
-              </Link>
-            </>
-          )}
         </nav>
 
         <button onClick={handleLogout} className="btn-secondary sidebar-logout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '12px' }}>

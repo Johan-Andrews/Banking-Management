@@ -1,6 +1,6 @@
 import { Navigate, Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { LayoutDashboard, Send, Users, LogOut, FileText, CreditCard, Shield } from 'lucide-react';
+import { LayoutDashboard, Send, Users, LogOut, FileText, CreditCard } from 'lucide-react';
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
@@ -59,12 +59,6 @@ export default function DashboardLayout() {
               </Link>
             );
           })}
-
-          <span className="sidebar-section-label">Administration</span>
-          <Link to="/admin" className={`nav-item ${location.pathname.startsWith('/admin') ? 'active' : ''}`}>
-            <Shield size={19} />
-            Admin Panel
-          </Link>
         </nav>
 
         {/* Logout */}
