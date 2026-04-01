@@ -39,24 +39,28 @@ export default function AdminAccounts() {
   );
 
   return (
-    <>
-      <div className="page-header fade-in">
+    <div className="max-w-7xl mx-auto px-2 md:px-0">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-gradient-purple" style={{ fontSize: '1.75rem' }}>All Bank Accounts</h1>
-          <p className="text-muted" style={{ fontSize: '0.9rem', marginTop: '4px' }}>
-            Manage accounts and freeze/unfreeze suspicious activity (REQ-7C)
-          </p>
+          <h1 className="text-3xl font-normal tracking-wide uppercase text-primary">All Bank Accounts</h1>
+          <p className="text-sm text-secondary mt-1">Manage accounts and freeze/unfreeze suspicious activity (REQ-7C)</p>
         </div>
-        <span className="badge info">{accounts.length} accounts</span>
+        <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary tracking-wide shadow-sm">
+          {accounts.length} accounts
+        </span>
       </div>
 
-      <div className="glass-panel-static fade-in delay-1">
-        <div className="admin-toolbar">
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search size={16} style={{ position: 'absolute', top: '12px', left: '14px', color: 'var(--text-tertiary)' }} />
-            <input type="text" className="search-input" placeholder="Search by name, email, or account number..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ width: '100%' }} />
+      <div className="bg-card rounded-[40px] p-6 md:p-10 shadow-sm min-h-[500px]">
+        {/* Toolbar */}
+        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
+          <div className="relative flex-1 max-w-lg">
+            <Search size={18} className="absolute top-1/2 left-5 -translate-y-1/2 text-secondary" />
+            <input type="text" className="w-full bg-app text-primary rounded-full pl-12 pr-6 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 transition-all shadow-sm" placeholder="Search by name, email, or account number..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
-          <select className="form-control" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ width: 'auto', minWidth: '160px' }}>
+          
+          <select className="bg-app text-primary rounded-full px-6 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 appearance-none shadow-sm border border-transparent min-w-[160px]" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
             <option value="">All Statuses</option>
             <option value="Active">Active</option>
             <option value="Frozen">Frozen</option>
@@ -65,62 +69,73 @@ export default function AdminAccounts() {
         </div>
 
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {[1, 2, 3].map(i => <div key={i} className="loading-skeleton" style={{ height: '52px' }} />)}
+          <div className="flex flex-col gap-3 animate-pulse">
+            {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 bg-app rounded-2xl" />)}
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="data-table">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr>
-                  <th>Account No</th>
-                  <th>Customer</th>
-                  <th>Type</th>
-                  <th>Balance</th>
-                  <th>Daily Limit</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                <tr className="border-b border-app">
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2">Account No</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2">Customer</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2">Type</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2 text-right">Balance</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2 text-right">Daily Limit</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-4 text-center">Status</th>
+                  <th className="pb-4 px-2"></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-app">
                 {filtered.map(acc => (
-                  <tr key={acc.account_id}>
-                    <td className="text-mono" style={{ fontSize: '0.88rem', letterSpacing: '1px' }}>
+                  <tr key={acc.account_id} className="hover:bg-app/30 transition-colors">
+                    <td className="py-4 px-2 text-[14px] font-mono tracking-widest text-primary whitespace-nowrap">
                       {acc.account_number.match(/.{1,4}/g)?.join(' ')}
                     </td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{(acc.customer as any)?.name || '—'}</div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)' }}>{(acc.customer as any)?.email || ''}</div>
+                    <td className="py-4 px-2">
+                      <div className="font-medium text-[14px] text-primary whitespace-nowrap">{(acc.customer as any)?.name || '—'}</div>
+                      <div className="text-[12px] text-secondary">{(acc.customer as any)?.email || ''}</div>
                     </td>
-                    <td><span className="badge neutral">{acc.account_type}</span></td>
-                    <td style={{ fontWeight: 600, fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}>₹{fmt(Number(acc.balance))}</td>
-                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>₹{fmt(Number(acc.daily_transaction_limit))}</td>
-                    <td>
-                      <span className={`badge ${acc.status === 'Active' ? 'success' : acc.status === 'Frozen' ? 'danger' : 'neutral'}`}>
+                    <td className="py-4 px-2">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-app border border-black/5 text-primary tracking-wide">
+                        {acc.account_type}
+                      </span>
+                    </td>
+                    <td className="py-4 px-2 text-right font-semibold font-mono tracking-wide text-primary">₹{fmt(Number(acc.balance))}</td>
+                    <td className="py-4 px-2 text-right font-mono tracking-wide text-secondary text-[13px]">₹{fmt(Number(acc.daily_transaction_limit))}</td>
+                    <td className="py-4 px-4 text-center">
+                      <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[11px] font-medium tracking-wide min-w-[70px] ${
+                        acc.status === 'Active' ? 'bg-accent-teal/10 text-accent-teal' : 
+                        acc.status === 'Frozen' ? 'bg-accent-rose/10 text-accent-rose' : 
+                        'bg-app border border-black/5 text-secondary'
+                      }`}>
                         {acc.status}
                       </span>
                     </td>
-                    <td>
+                    <td className="py-4 px-2 text-right whitespace-nowrap">
                       {acc.status !== 'Closed' && (
                         <button
-                          className={acc.status === 'Frozen' ? 'btn-success' : 'btn-danger'}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors ${acc.status === 'Frozen' ? 'text-accent-teal hover:bg-accent-teal/10' : 'text-accent-rose hover:bg-accent-rose/10'}`}
                           onClick={() => toggleFreeze(acc.account_id, acc.status)}
-                          style={{ fontSize: '0.78rem', padding: '6px 12px' }}
                         >
-                          {acc.status === 'Frozen' ? <><Unlock size={13} /> Unfreeze</> : <><Lock size={13} /> Freeze</>}
+                          {acc.status === 'Frozen' ? <><Unlock size={14} /> Unfreeze</> : <><Lock size={14} /> Freeze</>}
                         </button>
                       )}
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '32px' }}>No accounts found.</td></tr>
+                  <tr>
+                    <td colSpan={7} className="text-center text-secondary py-16">
+                      {searchTerm ? 'No accounts match search criteria.' : 'No accounts found.'}
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

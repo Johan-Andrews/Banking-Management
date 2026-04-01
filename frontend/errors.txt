@@ -1,0 +1,5 @@
+﻿src/pages/admin/AdminDashboard.tsx(108,27): error TS6133: 'i' is declared but its value is never read.
+src/pages/Beneficiaries.tsx(154,30): error TS2304: Cannot find name 'CheckCircle2'.
+src/pages/Beneficiaries.tsx(192,50): error TS2304: Cannot find name 'CheckCircle2'.
+src/pages/Loans.tsx(182,169): error TS2552: Cannot find name 'Clock'. Did you mean 'Lock'?
+src/pages/Transfer.tsx(4,85): error TS6133: 'Globe' is declared but its value is never read.

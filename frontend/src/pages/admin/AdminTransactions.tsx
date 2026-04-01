@@ -46,24 +46,28 @@ export default function AdminTransactions() {
   );
 
   return (
-    <>
-      <div className="page-header fade-in">
+    <div className="max-w-7xl mx-auto px-2 md:px-0">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-gradient-purple" style={{ fontSize: '1.75rem' }}>All Transactions</h1>
-          <p className="text-muted" style={{ fontSize: '0.9rem', marginTop: '4px' }}>
-            Complete transaction ledger across all accounts
-          </p>
+          <h1 className="text-3xl font-normal tracking-wide uppercase text-primary">All Transactions</h1>
+          <p className="text-sm text-secondary mt-1">Complete transaction ledger across all accounts</p>
         </div>
-        <span className="badge info">{transactions.length} shown</span>
+        <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary tracking-wide shadow-sm">
+          {transactions.length} shown
+        </span>
       </div>
 
-      <div className="glass-panel-static fade-in delay-1">
-        <div className="admin-toolbar">
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search size={16} style={{ position: 'absolute', top: '12px', left: '14px', color: 'var(--text-tertiary)' }} />
-            <input type="text" className="search-input" placeholder="Search by ref number..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ width: '100%' }} />
+      <div className="bg-card rounded-[40px] p-6 md:p-10 shadow-sm min-h-[500px]">
+        {/* Toolbar */}
+        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
+          <div className="relative flex-1 max-w-lg">
+            <Search size={18} className="absolute top-1/2 left-5 -translate-y-1/2 text-secondary" />
+            <input type="text" className="w-full bg-app text-primary rounded-full pl-12 pr-6 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 transition-all shadow-sm" placeholder="Search by ref number..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
-          <select className="form-control" value={filterType} onChange={e => setFilterType(e.target.value)} style={{ width: 'auto', minWidth: '160px' }}>
+          
+          <select className="bg-app text-primary rounded-full px-6 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 appearance-none shadow-sm border border-transparent min-w-[160px]" value={filterType} onChange={e => setFilterType(e.target.value)}>
             <option value="">All Types</option>
             <option value="Deposit">Deposit</option>
             <option value="Withdrawal">Withdrawal</option>
@@ -72,65 +76,74 @@ export default function AdminTransactions() {
         </div>
 
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {[1, 2, 3, 4].map(i => <div key={i} className="loading-skeleton" style={{ height: '52px' }} />)}
+          <div className="flex flex-col gap-3 animate-pulse">
+            {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 bg-app rounded-2xl" />)}
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="data-table">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr>
-                  <th>Date & Time</th>
-                  <th>Ref Number</th>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>From Account</th>
-                  <th>To Account</th>
-                  <th>Status</th>
+                <tr className="border-b border-app">
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2">Date & Time</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2">Ref Number</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2">Type</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2 text-right">Amount</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-4 text-right">From</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-4 text-right">To</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-4 text-center">Status</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-app">
                 {filtered.map(tx => (
-                  <tr key={tx.transaction_id}>
-                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                  <tr key={tx.transaction_id} className="hover:bg-app/30 transition-colors">
+                    <td className="py-4 px-2 text-[13px] text-secondary whitespace-nowrap">
                       {new Date(tx.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </td>
-                    <td className="text-mono" style={{ fontSize: '0.82rem' }}>{tx.transaction_ref || '—'}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {tx.type === 'Deposit' ? <ArrowDownRight size={14} color="var(--success)" /> :
-                         tx.type === 'Withdrawal' ? <ArrowUpRight size={14} color="var(--danger)" /> :
-                         <ArrowLeftRight size={14} color="var(--accent-primary)" />}
+                    <td className="py-4 px-2 text-[13px] font-mono tracking-widest text-[#81727E] uppercase whitespace-nowrap">
+                      {tx.transaction_ref || '—'}
+                    </td>
+                    <td className="py-4 px-2">
+                       <div className="flex items-center gap-2 text-[13px] font-medium text-primary">
+                        {tx.type === 'Deposit' ? <ArrowDownRight size={16} className="text-accent-teal" /> :
+                         tx.type === 'Withdrawal' ? <ArrowUpRight size={16} className="text-accent-rose" /> :
+                         <ArrowLeftRight size={16} className="text-secondary" />}
                         {tx.type}
                       </div>
                     </td>
-                    <td style={{
-                      fontWeight: 600, fontFamily: 'var(--font-mono)', fontSize: '0.9rem',
-                      color: tx.type === 'Deposit' ? 'var(--success)' : tx.type === 'Withdrawal' ? 'var(--danger)' : 'var(--text-primary)'
-                    }}>
-                      ₹{fmt(Number(tx.amount))}
+                    <td className="py-4 px-2 text-right font-semibold font-mono tracking-wide whitespace-nowrap">
+                      <span className={tx.type === 'Deposit' ? 'text-accent-teal' : tx.type === 'Withdrawal' ? 'text-accent-rose' : 'text-primary'}>
+                        ₹{fmt(Number(tx.amount))}
+                      </span>
                     </td>
-                    <td className="text-mono" style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)' }}>
+                    <td className="py-4 px-4 text-right font-mono tracking-wide text-secondary text-[12px]">
                       {tx.from_account_id ? tx.from_account_id.slice(0, 8) + '...' : '—'}
                     </td>
-                    <td className="text-mono" style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)' }}>
-                      {tx.to_account_id ? tx.to_account_id.slice(0, 8) + '...' : '—'}
+                    <td className="py-4 px-4 text-right font-mono tracking-wide text-secondary text-[12px]">
+                       {tx.to_account_id ? tx.to_account_id.slice(0, 8) + '...' : '—'}
                     </td>
-                    <td>
-                      <span className={`badge ${tx.status === 'Completed' ? 'success' : tx.status === 'Failed' ? 'danger' : 'warning'}`}>
+                    <td className="py-4 px-4 text-center">
+                      <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[11px] font-medium tracking-wide min-w-[70px] ${
+                        tx.status === 'Completed' ? 'bg-accent-teal/10 text-accent-teal' : 
+                        tx.status === 'Failed' ? 'bg-accent-rose/10 text-accent-rose' : 
+                        'bg-accent-gold/10 text-accent-gold'
+                      }`}>
                         {tx.status}
                       </span>
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '32px' }}>No transactions found.</td></tr>
+                  <tr>
+                    <td colSpan={7} className="text-center text-secondary py-16">
+                      {searchTerm ? 'No transactions match search criteria.' : 'No transactions found.'}
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

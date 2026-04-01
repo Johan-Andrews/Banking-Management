@@ -30,48 +30,70 @@ export default function AdminLayout() {
   const menuItems = allMenuItems.filter(item => !item.adminOnly || user.role === 'admin');
 
   return (
-    <div className="admin-layout">
-      <aside className="sidebar">
-        <div className="sidebar-brand" style={{ padding: '0 8px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: '36px', height: '36px', borderRadius: '10px',
-              background: 'linear-gradient(135deg, var(--accent-secondary), var(--danger))',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.1rem', fontWeight: 800, color: '#fff'
-            }}>
-              <Shield size={18} />
-            </div>
-            <div>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, lineHeight: 1.2 }}>AeroBank</h2>
-              <p style={{ color: 'var(--accent-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {user.role === 'admin' ? 'Admin Panel' : 'Manager Panel'}
-              </p>
-            </div>
+    <div className="bg-shell min-h-screen flex items-center justify-center p-4 md:p-8">
+      <div className="bg-app rounded-[40px] w-full max-w-[1400px] min-h-[85vh] overflow-hidden shadow-2xl transition-all duration-300 flex relative">
+        {/* Sidebar */}
+        <aside className="w-[260px] p-8 shrink-0 flex flex-col border-r border-[#e6dce3]/50 hidden md:flex">
+          {/* Brand */}
+          <div className="mb-8 px-2">
+            <h1 className="text-[28px] font-semibold text-primary tracking-wide uppercase flex items-center gap-2">
+              <Shield size={28} className="text-secondary" />
+              Smartbank
+            </h1>
+            <p className="text-sm font-medium text-secondary mt-1">
+              {user.role === 'admin' ? 'Admin Panel' : 'Manager Panel'}
+            </p>
           </div>
-        </div>
 
-        <nav style={{ flex: 1, marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span className="sidebar-section-label">Management</span>
+          {/* Navigation */}
+          <nav className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2">
+            {menuItems.map(item => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  to={item.path}
+                  key={item.name}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
+                    isActive 
+                      ? 'bg-elevated text-primary shadow-sm font-medium' 
+                      : 'text-secondary hover:text-primary hover:bg-[#e6dce3]/50'
+                  }`}
+                >
+                  <item.icon size={20} />
+                  <span className="text-[15px]">{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl text-secondary hover:text-accent-rose hover:bg-accent-rose/10 transition-colors mt-4 text-left"
+          >
+            <LogOut size={20} />
+            <span className="text-[15px] font-medium">Log Out</span>
+          </button>
+        </aside>
+
+        {/* Mobile bottom nav */}
+        <div className="md:hidden absolute bottom-0 left-0 right-0 bg-app border-t border-card/60 flex flex-wrap justify-around p-2 z-50">
           {menuItems.map(item => {
             const isActive = location.pathname === item.path;
             return (
-              <Link to={item.path} key={item.name} className={`nav-item ${isActive ? 'active' : ''}`}>
-                <item.icon size={19} />
-                {item.name}
+              <Link to={item.path} key={item.name} className={`p-2 rounded-xl flex flex-col items-center gap-1 ${isActive ? 'text-primary bg-elevated shadow-sm' : 'text-secondary'}`}>
+                <item.icon size={18} />
+                <span className="text-[10px] font-medium">{item.name.substring(0, 8)}</span>
               </Link>
             );
           })}
-        </nav>
+        </div>
 
-        <button onClick={handleLogout} className="btn-secondary sidebar-logout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '12px' }}>
-          <LogOut size={17} /> Sign Out
-        </button>
-      </aside>
-
-      <main className="main-content">
-        <Outlet />
-      </main>
+        {/* Main Content Area */}
+        <main className="flex-1 p-6 md:p-10 overflow-y-auto w-full pb-28 md:pb-10 relative bg-app">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

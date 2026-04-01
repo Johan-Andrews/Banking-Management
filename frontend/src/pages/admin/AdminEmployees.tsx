@@ -58,109 +58,128 @@ export default function AdminEmployees() {
   );
 
   return (
-    <>
-      <div className="page-header fade-in">
+    <div className="max-w-7xl mx-auto px-2 md:px-0">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-gradient-purple" style={{ fontSize: '1.75rem' }}>Employee Management</h1>
-          <p className="text-muted" style={{ fontSize: '0.9rem', marginTop: '4px' }}>
-            Manage bank staff records and branch assignments (REQ-20, REQ-21)
-          </p>
+          <h1 className="text-3xl font-normal tracking-wide uppercase text-primary">Employee Management</h1>
+          <p className="text-sm text-secondary mt-1">Manage bank staff records and branch assignments (REQ-20, REQ-21)</p>
         </div>
         
         {user?.role === 'admin' && (
-          <button className="btn-primary" onClick={() => { setShowForm(true); setEditId(null); setForm({ name: '', role: '', department: '', branch_id: '' }); }}>
-            <Plus size={16} /> Add Employee
+          <button 
+            className="inline-flex items-center gap-2 bg-secondary text-white px-6 py-3 rounded-full font-medium tracking-wide hover:bg-[#6c5e6a] transition-all active:scale-95 shadow-md"
+            onClick={() => { setShowForm(true); setEditId(null); setForm({ name: '', role: '', department: '', branch_id: '' }); }}
+          >
+            <Plus size={18} /> Add Employee
           </button>
         )}
       </div>
 
-      {/* Add/Edit Form */}
+      {/* Add/Edit Form Slide-Down */}
       {showForm && (
-        <div className="glass-panel-static fade-in-scale" style={{ maxWidth: '600px', marginBottom: '24px' }}>
-          <div className="flex-between" style={{ marginBottom: '20px' }}>
-            <h3>{editId ? 'Edit Employee' : 'Add New Employee'}</h3>
-            <button className="btn-icon" onClick={() => { setShowForm(false); setEditId(null); }}><X size={18} /></button>
-          </div>
+        <div className="mb-8 bg-card rounded-[32px] p-8 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300 relative border border-secondary/10">
+          <button className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full text-secondary hover:bg-app transition-colors" onClick={() => { setShowForm(false); setEditId(null); }}>
+            <X size={20} />
+          </button>
+          
+          <h3 className="text-xl font-medium text-primary mb-6">{editId ? 'Edit Employee' : 'Add New Employee'}</h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div className="form-group">
-              <label>Full Name</label>
-              <input type="text" className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Sreya Binoi" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+            <div className="space-y-1">
+              <label className="text-[13px] font-medium text-primary px-2">Full Name</label>
+              <input type="text" className="w-full bg-app text-primary rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Sreya Binoi" />
             </div>
-            <div className="form-group">
-              <label>Role</label>
-              <input type="text" className="form-control" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="e.g. Teller, Manager" />
+            <div className="space-y-1">
+              <label className="text-[13px] font-medium text-primary px-2">Role</label>
+              <input type="text" className="w-full bg-app text-primary rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="e.g. Teller, Manager" />
             </div>
-            <div className="form-group">
-              <label>Department</label>
-              <input type="text" className="form-control" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} placeholder="e.g. Operations" />
+            <div className="space-y-1">
+              <label className="text-[13px] font-medium text-primary px-2">Department</label>
+              <input type="text" className="w-full bg-app text-primary rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} placeholder="e.g. Operations" />
             </div>
-            <div className="form-group">
-              <label>Branch</label>
-              <select className="form-control" value={form.branch_id} onChange={e => setForm({ ...form, branch_id: e.target.value })}>
-                <option value="">— Select Branch —</option>
+            <div className="space-y-1">
+              <label className="text-[13px] font-medium text-primary px-2">Branch</label>
+              <select className="w-full bg-app text-primary rounded-full px-5 py-3 text-[14px] focus:outline-none focus:ring-2 focus:ring-secondary/30 appearance-none" value={form.branch_id} onChange={e => setForm({ ...form, branch_id: e.target.value })}>
+                <option value="" disabled>— Select Branch —</option>
                 {branches.map(b => <option key={b.branch_id} value={b.branch_id}>{b.branch_name}</option>)}
               </select>
             </div>
           </div>
 
-          <button className="btn-primary" onClick={handleSave} style={{ marginTop: '8px' }}>
-            <Save size={16} /> {editId ? 'Update Employee' : 'Add Employee'}
-          </button>
+          <div className="mt-8 flex justify-end">
+            <button className="bg-primary text-white border border-transparent px-8 py-3 rounded-full font-medium tracking-wide hover:bg-[#362e34] transition-all active:scale-95 shadow-md flex items-center gap-2" onClick={handleSave}>
+              <Save size={18} /> {editId ? 'Update Employee' : 'Add Employee'}
+            </button>
+          </div>
         </div>
       )}
 
-      <div className="glass-panel-static fade-in delay-1">
-        <div className="admin-toolbar">
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search size={16} style={{ position: 'absolute', top: '12px', left: '14px', color: 'var(--text-tertiary)' }} />
-            <input type="text" className="search-input" placeholder="Search employees..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ width: '100%' }} />
+      {/* Main List Box */}
+      <div className="bg-card rounded-[40px] p-6 md:p-10 shadow-sm min-h-[500px]">
+        
+        {/* Toolbar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div className="relative flex-1 max-w-lg">
+            <Search size={18} className="absolute top-1/2 left-5 -translate-y-1/2 text-secondary" />
+            <input type="text" className="w-full bg-app text-primary rounded-full pl-12 pr-6 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 transition-all shadow-sm" placeholder="Search employees..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
-          <span className="badge info">{employees.length} employees</span>
+          <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-accent-gold/10 text-accent-gold tracking-wide shadow-sm whitespace-nowrap">
+            {employees.length} employees
+          </span>
         </div>
 
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {[1, 2, 3].map(i => <div key={i} className="loading-skeleton" style={{ height: '52px' }} />)}
+          <div className="flex flex-col gap-3 animate-pulse">
+            {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 bg-app rounded-2xl" />)}
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="data-table">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Department</th>
-                  <th>Branch</th>
-                  <th>Actions</th>
+                <tr className="border-b border-app">
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2">Name</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2">Role</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2">Department</th>
+                  <th className="pb-4 text-[11px] tracking-wider uppercase font-semibold text-secondary px-2">Branch</th>
+                  <th className="pb-4 px-2"></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-app">
                 {filtered.map(emp => (
-                  <tr key={emp.employee_id}>
-                    <td style={{ fontWeight: 600 }}>{emp.name}</td>
-                    <td><span className="badge neutral">{emp.role}</span></td>
-                    <td style={{ color: 'var(--text-secondary)' }}>{emp.department}</td>
-                    <td style={{ color: 'var(--text-secondary)' }}>{(emp.branch as any)?.branch_name || '—'}</td>
-                    <td>
+                  <tr key={emp.employee_id} className="hover:bg-app/30 transition-colors">
+                    <td className="py-4 px-2 font-medium text-[14px] text-primary whitespace-nowrap">{emp.name}</td>
+                    <td className="py-4 px-2">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-app border border-black/5 text-primary tracking-wide">
+                        {emp.role}
+                      </span>
+                    </td>
+                    <td className="py-4 px-2 text-[14px] text-secondary">{emp.department}</td>
+                    <td className="py-4 px-2 text-[14px] text-secondary">{(emp.branch as any)?.branch_name || '—'}</td>
+                    <td className="py-4 px-2 text-right">
                       {user?.role === 'admin' ? (
-                        <button className="btn-secondary" onClick={() => startEdit(emp)} style={{ fontSize: '0.78rem', padding: '6px 12px' }}>
+                        <button className="px-4 py-1.5 rounded-full text-[12px] font-medium bg-app text-secondary hover:text-primary hover:shadow-sm transition-all" onClick={() => startEdit(emp)}>
                           Edit
                         </button>
                       ) : (
-                        <span className="badge info">View Only</span>
+                        <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-secondary/10 text-secondary tracking-wide">View Only</span>
                       )}
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '32px' }}>No employees found.</td></tr>
+                  <tr>
+                    <td colSpan={5} className="text-center text-secondary py-16">
+                      {searchTerm ? 'No employees match your search.' : 'No employees found.'}
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
