@@ -1,12 +1,32 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Search, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { formatDate } from '../../lib/utils';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function AdminLoans() {
   const [loans, setLoans] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [loading, setLoading] = useState(true);
+  const [cronMsg, setCronMsg] = useState({ text: '', type: '' });
+  const { user } = useAuth();
+
+  const runCron = async () => {
+    try {
+      setCronMsg({ text: 'Running automated sweeps...', type: 'info' });
+      const { data, error } = await supabase.rpc('simulate_cron_engine');
+      if (error) throw error;
+      setCronMsg({ 
+        text: `CRON Success! Flagged ${data.overdue_marked} overdue EMIs. Sent ${data.reminders_sent} 5-day auto-reminders.`, 
+        type: 'success' 
+      });
+      loadData();
+      setTimeout(() => setCronMsg({ text: '', type: '' }), 6000);
+    } catch (err: any) {
+      setCronMsg({ text: `CRON Failed: ${err.message}`, type: 'danger' });
+    }
+  };
 
   async function loadData() {
     setLoading(true);
@@ -29,7 +49,11 @@ export default function AdminLoans() {
   const filtered = loans.filter(l =>
     (l.customer as any)?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     l.loan_type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).sort((a, b) => {
+    const aOverdue = a.repayment_schedule?.some((s: any) => s.pay_status === 'Overdue') ? 1 : 0;
+    const bOverdue = b.repayment_schedule?.some((s: any) => s.pay_status === 'Overdue') ? 1 : 0;
+    return bOverdue - aOverdue;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-2 md:px-0">
@@ -60,7 +84,19 @@ export default function AdminLoans() {
             <option value="Rejected">Rejected</option>
             <option value="Closed">Closed</option>
           </select>
+
+          {user?.role !== 'staff' && (
+            <button onClick={runCron} className="bg-primary text-white rounded-full px-6 py-3.5 text-sm font-medium hover:bg-[#362e34] transition-colors shadow-sm whitespace-nowrap active:scale-95 flex items-center justify-center gap-2">
+              Force CRON Engine
+            </button>
+          )}
         </div>
+
+        {cronMsg.text && (
+            <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium animate-in fade-in ${cronMsg.type === 'success' ? 'bg-accent-teal/10 text-accent-teal' : cronMsg.type === 'info' ? 'bg-accent-gold/10 text-accent-gold' : 'bg-accent-rose/10 text-accent-rose'}`}>
+               <CheckCircle2 size={18} /> {cronMsg.text}
+            </div>
+        )}
 
         {loading ? (
           <div className="flex flex-col gap-3 animate-pulse">
@@ -104,7 +140,7 @@ export default function AdminLoans() {
                     <td className="py-4 px-4 text-right font-mono tracking-wide text-secondary text-[13px]">{loan.interest_rate}%</td>
                     <td className="py-4 px-4 text-center font-mono tracking-wide text-secondary text-[13px]">{loan.tenure_months} mo</td>
                     <td className="py-4 px-4 text-[13px] text-secondary whitespace-nowrap">
-                       {new Date(loan.applied_on).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                       {formatDate(loan.applied_on)}
                     </td>
                     <td className="py-4 px-4 text-center">
                       <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[11px] font-medium tracking-wide min-w-[70px] ${
@@ -117,7 +153,7 @@ export default function AdminLoans() {
                       </span>
                     </td>
                     <td className="py-4 px-2 text-right whitespace-nowrap">
-                      {loan.status === 'Pending' && (
+                      {loan.status === 'Pending' && user?.role !== 'staff' && (
                         <div className="flex justify-end gap-2">
                           <button
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors text-accent-teal hover:bg-accent-teal/10"
@@ -132,6 +168,9 @@ export default function AdminLoans() {
                             <XCircle size={14} /> Reject
                           </button>
                         </div>
+                      )}
+                      {loan.status === 'Pending' && user?.role === 'staff' && (
+                        <span className="text-[11px] text-secondary italic">View only</span>
                       )}
                     </td>
                   </tr>

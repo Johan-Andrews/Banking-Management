@@ -3,7 +3,59 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: #f3eee8;
+    --foreground: #4a3f48;
+    --card: #e6dce3;
+    --card-foreground: #4a3f48;
+    --popover: #ffffff;
+    --popover-foreground: #4a3f48;
+    --primary: #4a3f48;
+    --primary-foreground: #ffffff;
+    --secondary: #877685;
+    --secondary-foreground: #ffffff;
+    --muted: #e6dce3;
+    --muted-foreground: #877685;
+    --accent: #df7b89;
+    --accent-foreground: #ffffff;
+    --destructive: #df7b89;
+    --destructive-foreground: #ffffff;
+    --border: #cbb5c4;
+    --input: #cbb5c4;
+    --ring: #877685;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
   body {
-    @apply bg-shell font-sans text-primary antialiased;
+    @apply bg-background text-foreground antialiased selection:bg-accent/30 selection:text-primary;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .bg-shell {
+    background-color: #cbb5c4;
+  }
+  .bg-app {
+    background-color: #f3eee8;
+  }
+  .bg-elevated {
+    background-color: #ffffff;
+  }
+  
+  /* Neomorphic Utility Shadows */
+  .shadow-neo-sm {
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.05), -2px -2px 5px rgba(255,255,255,0.8);
+  }
+  .shadow-neo-md {
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.07), -5px -5px 15px rgba(255,255,255,0.8);
   }
 }

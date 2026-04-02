@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Send, AlertCircle, CheckCircle2, ArrowRight, ArrowLeft, Search, Building2 } from 'lucide-react';
+import { formatDate } from '../lib/utils';
 
 type Step = 1 | 2 | 3 | 4;
 type TransferMode = 'internal' | 'beneficiary' | 'external';
@@ -132,6 +133,7 @@ export default function Transfer() {
       if (scheduledDate) {
         payload.is_scheduled = true;
         payload.scheduled_for = scheduledDate;
+        payload.status = 'Scheduled';
       }
 
       if (transferMode === 'internal') {
@@ -234,7 +236,7 @@ export default function Transfer() {
 
     rows.push({ label: 'Transfer Amount', value: `₹${fmt(parseFloat(amount) || 0)}`, highlight: true });
     if (scheduledDate) {
-      rows.push({ label: 'Scheduled Details', value: `Executes on ${new Date(scheduledDate).toLocaleDateString()}`});
+      rows.push({ label: 'Scheduled Details', value: `Executes on ${formatDate(scheduledDate)}`});
     }
     return rows;
   };

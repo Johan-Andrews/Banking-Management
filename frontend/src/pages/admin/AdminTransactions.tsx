@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ArrowLeftRight, Search, ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { formatDateTime } from '../../lib/utils';
 
 export default function AdminTransactions() {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -13,7 +14,7 @@ export default function AdminTransactions() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      
+
       let allowedAccountIds: string[] = [];
       if (user?.role === 'manager' && user.branch_id) {
         const accRes = await supabase.from('account').select('account_id').eq('branch_id', user.branch_id);
@@ -23,11 +24,10 @@ export default function AdminTransactions() {
       let query = supabase.from('transaction').select('*').order('timestamp', { ascending: false }).limit(200);
       if (filterType) query = query.eq('type', filterType);
 
-      if (user?.role === 'manager' && user.branch_id) {
+      if ((user?.role === 'manager' || user?.role === 'staff') && user.branch_id) {
         if (allowedAccountIds.length > 0) {
           query = query.or(`from_account_id.in.(${allowedAccountIds.join(',')}),to_account_id.in.(${allowedAccountIds.join(',')})`);
         } else {
-          // Force empty result if branch has no accounts
           query = query.eq('transaction_id', '00000000-0000-0000-0000-000000000000');
         }
       }
@@ -37,7 +37,17 @@ export default function AdminTransactions() {
       setLoading(false);
     }
     load();
-  }, [filterType]);
+  }, [filterType, user]);
+
+  const handleApprove = async (txId: string, status: string) => {
+    try {
+      const { error } = await supabase.rpc('approve_transaction', { p_txn_id: txId, p_status: status });
+      if (error) throw error;
+      setTransactions(prev => prev.map(t => t.transaction_id === txId ? { ...t, status } : t));
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
 
   const fmt = (n: number) => new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
@@ -47,7 +57,7 @@ export default function AdminTransactions() {
 
   return (
     <div className="max-w-7xl mx-auto px-2 md:px-0">
-      
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
@@ -66,7 +76,7 @@ export default function AdminTransactions() {
             <Search size={18} className="absolute top-1/2 left-5 -translate-y-1/2 text-secondary" />
             <input type="text" className="w-full bg-app text-primary rounded-full pl-12 pr-6 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 transition-all shadow-sm" placeholder="Search by ref number..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
-          
+
           <select className="bg-app text-primary rounded-full px-6 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 appearance-none shadow-sm border border-transparent min-w-[160px]" value={filterType} onChange={e => setFilterType(e.target.value)}>
             <option value="">All Types</option>
             <option value="Deposit">Deposit</option>
@@ -97,16 +107,16 @@ export default function AdminTransactions() {
                 {filtered.map(tx => (
                   <tr key={tx.transaction_id} className="hover:bg-app/30 transition-colors">
                     <td className="py-4 px-2 text-[13px] text-secondary whitespace-nowrap">
-                      {new Date(tx.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      {formatDateTime(tx.timestamp)}
                     </td>
                     <td className="py-4 px-2 text-[13px] font-mono tracking-widest text-[#81727E] uppercase whitespace-nowrap">
                       {tx.transaction_ref || '—'}
                     </td>
                     <td className="py-4 px-2">
-                       <div className="flex items-center gap-2 text-[13px] font-medium text-primary">
+                      <div className="flex items-center gap-2 text-[13px] font-medium text-primary">
                         {tx.type === 'Deposit' ? <ArrowDownRight size={16} className="text-accent-teal" /> :
-                         tx.type === 'Withdrawal' ? <ArrowUpRight size={16} className="text-accent-rose" /> :
-                         <ArrowLeftRight size={16} className="text-secondary" />}
+                          tx.type === 'Withdrawal' ? <ArrowUpRight size={16} className="text-accent-rose" /> :
+                            <ArrowLeftRight size={16} className="text-secondary" />}
                         {tx.type}
                       </div>
                     </td>
@@ -119,16 +129,22 @@ export default function AdminTransactions() {
                       {tx.from_account_id ? tx.from_account_id.slice(0, 8) + '...' : '—'}
                     </td>
                     <td className="py-4 px-4 text-right font-mono tracking-wide text-secondary text-[12px]">
-                       {tx.to_account_id ? tx.to_account_id.slice(0, 8) + '...' : '—'}
+                      {tx.to_account_id ? tx.to_account_id.slice(0, 8) + '...' : '—'}
                     </td>
                     <td className="py-4 px-4 text-center">
-                      <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[11px] font-medium tracking-wide min-w-[70px] ${
-                        tx.status === 'Completed' ? 'bg-accent-teal/10 text-accent-teal' : 
-                        tx.status === 'Failed' ? 'bg-accent-rose/10 text-accent-rose' : 
-                        'bg-accent-gold/10 text-accent-gold'
-                      }`}>
-                        {tx.status}
-                      </span>
+                      {tx.status === 'Pending_Approval' && user?.role !== 'staff' ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => handleApprove(tx.transaction_id, 'Completed')} className="px-3 py-1 rounded-full text-[11px] font-medium bg-accent-teal/10 text-accent-teal hover:bg-accent-teal hover:text-white transition-all">Approve</button>
+                          <button onClick={() => handleApprove(tx.transaction_id, 'Failed')} className="px-3 py-1 rounded-full text-[11px] font-medium bg-accent-rose/10 text-accent-rose hover:bg-accent-rose hover:text-white transition-all">Reject</button>
+                        </div>
+                      ) : (
+                        <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[11px] font-medium tracking-wide min-w-[70px] ${tx.status === 'Completed' ? 'bg-accent-teal/10 text-accent-teal' :
+                            tx.status === 'Failed' ? 'bg-accent-rose/10 text-accent-rose' :
+                              'bg-accent-gold/10 text-accent-gold'
+                          }`}>
+                          {tx.status}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

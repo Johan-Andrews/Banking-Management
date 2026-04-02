@@ -3,9 +3,9 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Send, ChevronRight, ArrowDownRight, ArrowUpRight, CreditCard, User, Landmark, Plus, Calendar } from 'lucide-react';
+import { formatDate } from '../lib/utils';
 
 const fmt = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-const dateFmt = new Intl.DateTimeFormat('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -144,7 +144,7 @@ export default function Dashboard() {
                             {tx.type === 'Transfer' ? (isDebit ? `To ${tx.to_account?.account_number || tx.beneficiary?.payee_name || 'Account'}` : `From ${tx.from_account?.account_number || 'Account'}`) : tx.type}
                           </p>
                           <p className="text-[12px] text-secondary">
-                            {new Date(tx.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            {formatDate(tx.timestamp)}
                           </p>
                         </div>
                       </div>
@@ -184,7 +184,7 @@ export default function Dashboard() {
                       <span className="text-2xl font-light text-primary w-8">{day.toString().padStart(2, '0')}</span>
                       <div className="flex-1">
                         <p className="text-[14px] font-medium text-primary">{(emi.loan as any)?.loan_type} Loan Installment</p>
-                        <p className="text-[11px] text-secondary">Due: {dateFmt.format(new Date(emi.due_date))}</p>
+                        <p className="text-[11px] text-secondary">Due: {formatDate(emi.due_date)}</p>
                       </div>
                       <span className="text-[15px] font-medium text-primary">₹{fmt.format(emi.emi_amount)}</span>
                     </div>

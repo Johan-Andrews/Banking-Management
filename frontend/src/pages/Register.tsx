@@ -72,7 +72,7 @@ export default function Register() {
       if (rpcError) throw rpcError;
 
       if (data) {
-        login(data);
+        login({ id: data, role: 'customer', username: formData.username });
         navigate('/dashboard');
       }
     } catch (err: any) {
@@ -96,7 +96,7 @@ export default function Register() {
   return (
     <div className="bg-app rounded-[40px] p-8 md:p-12 w-full max-w-xl shadow-2xl transition-all duration-200 my-8">
       <div className="text-center mb-8">
-        <h1 className="text-[28px] font-semibold text-primary tracking-wide uppercase">Smartbank</h1>
+        <h1 className="text-[28px] font-semibold text-primary tracking-wide uppercase">AeroBank</h1>
       </div>
       
       <div className="text-center mb-8">

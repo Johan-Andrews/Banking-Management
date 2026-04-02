@@ -31,7 +31,7 @@ export default function DashboardLayout() {
         <aside className="w-[240px] p-8 shrink-0 flex flex-col border-r border-[#e6dce3]/50 hidden md:flex">
           {/* Brand */}
           <div className="mb-10 px-2">
-            <h1 className="text-[28px] font-semibold text-primary tracking-wide uppercase">Smartbank</h1>
+            <h1 className="text-[28px] font-semibold text-primary tracking-wide uppercase">AeroBank</h1>
           </div>
 
           {/* Navigation */}
@@ -66,7 +66,7 @@ export default function DashboardLayout() {
         </aside>
 
         {/* Mobile bottom nav */}
-        <div className="md:hidden absolute bottom-0 left-0 right-0 bg-app border-t border-card/60 flex justify-around p-3 z-50">
+        <div className="md:hidden absolute bottom-0 left-0 right-0 bg-app border-t border-card/60 flex justify-around p-3 z-[100]">
           {menuItems.map(item => {
             const isActive = location.pathname === item.path;
             return (

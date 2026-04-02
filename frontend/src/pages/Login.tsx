@@ -59,7 +59,7 @@ export default function Login() {
   return (
     <div className="bg-app rounded-[40px] p-8 md:p-12 w-full max-w-md shadow-2xl transition-all duration-200">
       <div className="text-center mb-8">
-        <h1 className="text-[28px] font-semibold text-primary tracking-wide uppercase">Smartbank</h1>
+        <h1 className="text-[28px] font-semibold text-primary tracking-wide uppercase italic">AeroBank</h1>
       </div>
       
       {forgotMode ? (

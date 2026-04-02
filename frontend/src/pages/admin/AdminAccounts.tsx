@@ -14,7 +14,7 @@ export default function AdminAccounts() {
     setLoading(true);
     let query = supabase.from('account').select('*, customer:customer_id(name, email)').order('account_number');
     if (filterStatus) query = query.eq('status', filterStatus);
-    if (user?.role === 'manager' && user.branch_id) {
+    if ((user?.role === 'manager' || user?.role === 'staff') && user.branch_id) {
       query = query.eq('branch_id', user.branch_id);
     }
     const { data } = await query;
@@ -113,13 +113,16 @@ export default function AdminAccounts() {
                       </span>
                     </td>
                     <td className="py-4 px-2 text-right whitespace-nowrap">
-                      {acc.status !== 'Closed' && (
+                      {acc.status !== 'Closed' && user?.role !== 'staff' && (
                         <button
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors ${acc.status === 'Frozen' ? 'text-accent-teal hover:bg-accent-teal/10' : 'text-accent-rose hover:bg-accent-rose/10'}`}
                           onClick={() => toggleFreeze(acc.account_id, acc.status)}
                         >
                           {acc.status === 'Frozen' ? <><Unlock size={14} /> Unfreeze</> : <><Lock size={14} /> Freeze</>}
                         </button>
+                      )}
+                      {user?.role === 'staff' && (
+                        <span className="text-[11px] text-secondary italic">View only</span>
                       )}
                     </td>
                   </tr>

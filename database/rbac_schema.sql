@@ -33,7 +33,7 @@ BEGIN
     
     IF v_admin_record.password_hash = crypt(p_password, v_admin_record.password_hash) THEN
         INSERT INTO audit_logs (username, event_type, ip_address) VALUES (p_username, 'ADMIN_LOGIN_SUCCESS', p_ip::INET);
-        RETURN jsonb_build_object('success', true, 'user_id', v_admin_record.admin_id, 'role', 'admin');
+        RETURN jsonb_build_object('success', true, 'user_id', v_admin_record.admin_id, 'role', 'admin', 'username', p_username);
     ELSE
         INSERT INTO audit_logs (username, event_type, ip_address) VALUES (p_username, 'ADMIN_LOGIN_FAILED', p_ip::INET);
         RETURN jsonb_build_object('success', false, 'message', 'Invalid Admin Credentials');
@@ -68,11 +68,13 @@ BEGIN
         RETURN jsonb_build_object(
             'success', true, 
             'user_id', v_employee_record.employee_id,
-            'role', 'manager',
+            'role', LOWER(v_employee_record.role),
             'department', v_employee_record.department,
-            'branch_id', v_employee_record.branch_id
+            'branch_id', v_employee_record.branch_id,
+            'username', p_username
         );
     ELSE
+    
         UPDATE employee_login SET failed_attempts = failed_attempts + 1 WHERE login_id = v_login_record.login_id;
         INSERT INTO audit_logs (username, event_type, ip_address) VALUES (p_username, 'EMP_LOGIN_FAILED', p_ip::INET);
         
