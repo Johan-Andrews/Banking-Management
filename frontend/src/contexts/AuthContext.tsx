@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (
           parsed &&
           typeof parsed.id === 'string' &&
+          typeof parsed.username === 'string' &&
           ['customer', 'manager', 'admin', 'staff'].includes(parsed.role)
         ) {
           setUser(parsed as UserData);

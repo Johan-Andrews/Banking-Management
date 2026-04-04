@@ -13,7 +13,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 /**
  * Freezes a bank account by its account number.
  * @param {string|number} accountNumber - The unique account number to freeze.
- * @returns {Promise<{success: boolean, data?: any, error?: string}>}
+ * @returns {Promise<{success: boolean, message?: string, data?: any, error?: string}>}
  */
 export async function freezeAccount(accountNumber) {
   // 1. Input Validation
