@@ -76,53 +76,57 @@ export default function AdminDashboard() {
 
   const fmt = (n: number) => new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
+  const cards = [
+    { label: 'Total Customers', value: stats.customers, icon: Users, color: 'text-accent-teal', bg: 'bg-accent-teal/10' },
+    { label: 'Total Accounts', value: stats.accounts, icon: CreditCard, color: 'text-primary', bg: 'bg-elevated' },
+    { label: 'Total Transactions', value: stats.transactions, icon: ArrowLeftRight, color: 'text-accent-gold', bg: 'bg-accent-gold/10' },
+    { label: 'Pending Loans', value: stats.pendingLoans, icon: FileText, color: 'text-accent-rose', bg: 'bg-accent-rose/10' },
+    { label: 'Total Deposits', value: `₹${fmt(stats.totalDeposits)}`, icon: TrendingUp, color: 'text-accent-teal', bg: 'bg-accent-teal/10' },
+    { label: 'Total Withdrawals', value: `₹${fmt(stats.totalWithdrawals)}`, icon: BadgeDollarSign, color: 'text-secondary', bg: 'bg-app' },
+    { label: 'Frozen Accounts', value: stats.frozenAccounts, icon: AlertTriangle, color: 'text-accent-rose', bg: 'bg-accent-rose/10' },
+  ];
+
   if (loading) {
     return (
-      <div>
-        <div className="loading-skeleton" style={{ height: '40px', width: '300px', marginBottom: '24px' }} />
-        <div className="admin-kpi-grid">
-          {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="loading-skeleton" style={{ height: '140px' }} />)}
+      <div className="animate-pulse">
+        <div className="h-10 w-64 bg-card rounded-xl mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1,2,3,4,5,6,7,8].map(i => <div key={i} className="h-32 bg-card rounded-[32px]" />)}
         </div>
       </div>
     );
   }
 
-  const cards = [
-    { label: 'Total Customers', value: stats.customers, icon: Users, variant: 'cyan' as const },
-    { label: 'Total Accounts', value: stats.accounts, icon: CreditCard, variant: 'purple' as const },
-    { label: 'Total Transactions', value: stats.transactions, icon: ArrowLeftRight, variant: 'emerald' as const },
-    { label: 'Pending Loans', value: stats.pendingLoans, icon: FileText, variant: 'amber' as const },
-    { label: 'Total Deposits', value: `₹${fmt(stats.totalDeposits)}`, icon: TrendingUp, variant: 'emerald' as const },
-    { label: 'Total Withdrawals', value: `₹${fmt(stats.totalWithdrawals)}`, icon: BadgeDollarSign, variant: 'amber' as const },
-    { label: 'Frozen Accounts', value: stats.frozenAccounts, icon: AlertTriangle, variant: 'cyan' as const },
-  ];
-
   return (
-    <>
-      <div className="page-header fade-in">
-        <div>
-          <h1 className="text-gradient-purple" style={{ fontSize: '1.75rem' }}>Admin Dashboard</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>
-            System-wide overview of all banking operations
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-normal tracking-wide uppercase text-primary">System Overview</h1>
+        <p className="text-sm text-secondary mt-1">High-level metrics of all banking operations.</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {cards.map((card, _i) => (
+          <div key={card.label} className="bg-card rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+            <div className={`absolute top-0 right-0 w-24 h-24 blur-[40px] opacity-20 ${card.bg} -translate-y-1/2 translate-x-1/2`} />
+            
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${card.bg} ${card.color}`}>
+              <card.icon size={24} />
+            </div>
+
+            <div className="text-[13px] text-secondary font-medium tracking-wide uppercase mb-1">{card.label}</div>
+            <div className="text-2xl font-semibold text-primary font-mono tracking-wide">{card.value}</div>
+          </div>
+        ))}
+
+        {/* Info Card */}
+        <div className="bg-primary text-white rounded-[32px] p-6 shadow-md flex flex-col justify-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-white/5" />
+          <h3 className="text-lg font-medium mb-2 relative z-10">Management Panel</h3>
+          <p className="text-sm text-white/70 relative z-10 leading-relaxed">
+            Use the sidebar to manage customers, accounts, loans, and audit logs.
           </p>
         </div>
       </div>
-
-      <div className="admin-kpi-grid fade-in delay-1">
-        {cards.map((card, i) => (
-          <div key={card.label} className={`stat-card ${card.variant}`} style={{ animationDelay: `${0.05 * i}s` }}>
-            <div className="stat-icon"><card.icon size={22} /></div>
-            <div className="stat-label">{card.label}</div>
-            <div className="stat-value">{card.value}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="glass-panel-static fade-in delay-3" style={{ padding: '20px 24px' }}>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-          Use the sidebar to manage <strong>customers</strong>, <strong>employees</strong>, <strong>accounts</strong>, <strong>transactions</strong>, <strong>loans</strong>, <strong>audit logs</strong>, and view <strong>financial summaries</strong>.
-        </p>
-      </div>
-    </>
+    </div>
   );
 }

@@ -52,10 +52,14 @@ export default function AdminFinancials() {
 
   if (loading) {
     return (
-      <div>
-        <div className="loading-skeleton" style={{ height: '40px', width: '300px', marginBottom: '24px' }} />
-        <div className="admin-kpi-grid">
-          {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="loading-skeleton" style={{ height: '140px' }} />)}
+      <div className="animate-pulse max-w-7xl mx-auto">
+        <div className="h-10 w-64 bg-card rounded-xl mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {[1,2,3,4].map(i => <div key={i} className="h-32 bg-card rounded-[32px]" />)}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="h-64 bg-card rounded-[40px]" />
+          <div className="h-64 bg-card rounded-[40px]" />
         </div>
       </div>
     );
@@ -64,117 +68,117 @@ export default function AdminFinancials() {
   const netFlow = data.totalDeposits - data.totalWithdrawals;
 
   return (
-    <>
-      <div className="page-header fade-in">
-        <div>
-          <h1 className="text-gradient-purple" style={{ fontSize: '1.75rem' }}>Financial Summary</h1>
-          <p className="text-muted" style={{ fontSize: '0.9rem', marginTop: '4px' }}>
-            Bank-wide income, outcome, and balance analytics
-          </p>
-        </div>
+    <div className="max-w-7xl mx-auto px-2 md:px-0">
+      
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-normal tracking-wide uppercase text-primary">Financial Summary</h1>
+        <p className="text-sm text-secondary mt-1">Bank-wide income, outcome, and balance analytics</p>
       </div>
 
       {/* Top Summary */}
-      <div className="admin-kpi-grid fade-in delay-1">
-        <div className="stat-card emerald">
-          <div className="stat-icon"><Wallet size={22} /></div>
-          <div className="stat-label">Total Bank Deposits</div>
-          <div className="stat-value" style={{ color: 'var(--accent-emerald)' }}>₹{fmt(data.totalBalanceInBank)}</div>
-          <div className="stat-change" style={{ color: 'var(--text-tertiary)' }}>Sum of all account balances</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-card rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 blur-[40px] opacity-20 bg-accent-teal/10 -translate-y-1/2 translate-x-1/2" />
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-accent-teal/10 text-accent-teal"><Wallet size={24} /></div>
+          <div className="text-[13px] text-secondary font-medium tracking-wide uppercase mb-1">Total Bank Deposits</div>
+          <div className="text-2xl font-semibold text-accent-teal font-mono tracking-wide">₹{fmt(data.totalBalanceInBank)}</div>
+          <div className="text-[11px] text-secondary mt-2">Sum of all account balances</div>
         </div>
 
-        <div className="stat-card cyan">
-          <div className="stat-icon"><TrendingUp size={22} /></div>
-          <div className="stat-label">Net Cash Flow</div>
-          <div className="stat-value" style={{ color: netFlow >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+        <div className="bg-card rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className={`absolute top-0 right-0 w-24 h-24 blur-[40px] opacity-20 -translate-y-1/2 translate-x-1/2 ${netFlow >= 0 ? 'bg-accent-teal/10' : 'bg-accent-rose/10'}`} />
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${netFlow >= 0 ? 'bg-accent-teal/10 text-accent-teal' : 'bg-accent-rose/10 text-accent-rose'}`}>
+            <TrendingUp size={24} />
+          </div>
+          <div className="text-[13px] text-secondary font-medium tracking-wide uppercase mb-1">Net Cash Flow</div>
+          <div className={`text-2xl font-semibold font-mono tracking-wide ${netFlow >= 0 ? 'text-accent-teal' : 'text-accent-rose'}`}>
             {netFlow >= 0 ? '+' : ''}₹{fmt(netFlow)}
           </div>
-          <div className="stat-change" style={{ color: 'var(--text-tertiary)' }}>Deposits − Withdrawals</div>
+          <div className="text-[11px] text-secondary mt-2">Deposits − Withdrawals</div>
         </div>
 
-        <div className="stat-card purple">
-          <div className="stat-icon"><PiggyBank size={22} /></div>
-          <div className="stat-label">Loans Disbursed</div>
-          <div className="stat-value">₹{fmt(data.totalLoanDisbursed)}</div>
-          <div className="stat-change" style={{ color: 'var(--text-tertiary)' }}>Approved loans total</div>
+        <div className="bg-card rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 blur-[40px] opacity-20 bg-primary/10 -translate-y-1/2 translate-x-1/2" />
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-elevated text-primary"><PiggyBank size={24} /></div>
+          <div className="text-[13px] text-secondary font-medium tracking-wide uppercase mb-1">Loans Disbursed</div>
+          <div className="text-2xl font-semibold text-primary font-mono tracking-wide">₹{fmt(data.totalLoanDisbursed)}</div>
+          <div className="text-[11px] text-secondary mt-2">Approved loans total</div>
         </div>
 
-        <div className="stat-card amber">
-          <div className="stat-icon"><BadgeDollarSign size={22} /></div>
-          <div className="stat-label">EMI Collected</div>
-          <div className="stat-value" style={{ color: 'var(--accent-amber)' }}>₹{fmt(data.totalEmiCollected)}</div>
-          <div className="stat-change" style={{ color: 'var(--text-tertiary)' }}>From paid installments</div>
+        <div className="bg-card rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 blur-[40px] opacity-20 bg-accent-gold/10 -translate-y-1/2 translate-x-1/2" />
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-accent-gold/10 text-accent-gold"><BadgeDollarSign size={24} /></div>
+          <div className="text-[13px] text-secondary font-medium tracking-wide uppercase mb-1">EMI Collected</div>
+          <div className="text-2xl font-semibold text-accent-gold font-mono tracking-wide">₹{fmt(data.totalEmiCollected)}</div>
+          <div className="text-[11px] text-secondary mt-2">From paid installments</div>
         </div>
       </div>
 
       {/* Detailed Breakdown */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }} className="fade-in delay-2">
-        {/* Income */}
-        <div className="glass-panel-static">
-          <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <TrendingUp size={20} color="var(--success)" /> Income Breakdown
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Income Box */}
+        <div className="bg-card rounded-[40px] p-8 shadow-sm">
+          <h3 className="text-xl font-medium text-primary mb-6 flex items-center gap-2">
+            <TrendingUp size={22} className="text-accent-teal" /> Income Breakdown
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 16px', background: 'rgba(var(--success-rgb), 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(var(--success-rgb), 0.1)' }}>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center p-5 bg-accent-teal/5 border border-accent-teal/10 rounded-[24px]">
               <div>
-                <div style={{ fontWeight: 600 }}>Deposits</div>
-                <div style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)' }}>{data.depositCount} transactions</div>
+                <div className="font-medium text-primary">Deposits</div>
+                <div className="text-[12px] text-secondary mt-1">{data.depositCount} transactions</div>
               </div>
-              <div style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--success)', fontSize: '1.1rem', alignSelf: 'center' }}>
-                +₹{fmt(data.totalDeposits)}
-              </div>
+              <div className="font-semibold font-mono text-accent-teal text-lg tracking-wide">+₹{fmt(data.totalDeposits)}</div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 16px', background: 'rgba(var(--success-rgb), 0.03)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(var(--success-rgb), 0.08)' }}>
+            <div className="flex justify-between items-center p-5 bg-accent-teal/5 border border-accent-teal/10 rounded-[24px]">
               <div>
-                <div style={{ fontWeight: 600 }}>EMI Collections</div>
-                <div style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)' }}>From repayment schedules</div>
+                <div className="font-medium text-primary">EMI Collections</div>
+                <div className="text-[12px] text-secondary mt-1">From repayment schedules</div>
               </div>
-              <div style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--success)', fontSize: '1.1rem', alignSelf: 'center' }}>
-                +₹{fmt(data.totalEmiCollected)}
-              </div>
+              <div className="font-semibold font-mono text-accent-teal text-lg tracking-wide">+₹{fmt(data.totalEmiCollected)}</div>
             </div>
 
-            <div className="divider" />
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px' }}>
-              <span style={{ fontWeight: 700, fontSize: '1rem' }}>Total Income</span>
-              <span style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--success)', fontSize: '1.15rem' }}>
+            <div className="my-6 h-px bg-app w-full" />
+            
+            <div className="flex justify-between items-center px-4">
+              <span className="font-medium text-lg text-primary">Total Income</span>
+              <span className="font-bold font-mono text-accent-teal text-2xl tracking-wide">
                 ₹{fmt(data.totalDeposits + data.totalEmiCollected)}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Outcome */}
-        <div className="glass-panel-static">
-          <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <TrendingDown size={20} color="var(--danger)" /> Outcome Breakdown
+        {/* Outcome Box */}
+        <div className="bg-card rounded-[40px] p-8 shadow-sm">
+          <h3 className="text-xl font-medium text-primary mb-6 flex items-center gap-2">
+            <TrendingDown size={22} className="text-accent-rose" /> Outcome Breakdown
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 16px', background: 'rgba(var(--danger-rgb), 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(var(--danger-rgb), 0.1)' }}>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center p-5 bg-accent-rose/5 border border-accent-rose/10 rounded-[24px]">
               <div>
-                <div style={{ fontWeight: 600 }}>Withdrawals</div>
-                <div style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)' }}>{data.withdrawalCount} transactions</div>
+                <div className="font-medium text-primary">Withdrawals</div>
+                <div className="text-[12px] text-secondary mt-1">{data.withdrawalCount} transactions</div>
               </div>
-              <div style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--danger)', fontSize: '1.1rem', alignSelf: 'center' }}>
-                -₹{fmt(data.totalWithdrawals)}
-              </div>
+              <div className="font-semibold font-mono text-accent-rose text-lg tracking-wide">-₹{fmt(data.totalWithdrawals)}</div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 16px', background: 'rgba(var(--danger-rgb), 0.03)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(var(--danger-rgb), 0.08)' }}>
+            <div className="flex justify-between items-center p-5 bg-accent-rose/5 border border-accent-rose/10 rounded-[24px]">
               <div>
-                <div style={{ fontWeight: 600 }}>Loans Disbursed</div>
-                <div style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)' }}>Approved loans principal</div>
+                <div className="font-medium text-primary">Loans Disbursed</div>
+                <div className="text-[12px] text-secondary mt-1">Approved loans principal</div>
               </div>
-              <div style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--danger)', fontSize: '1.1rem', alignSelf: 'center' }}>
-                -₹{fmt(data.totalLoanDisbursed)}
-              </div>
+              <div className="font-semibold font-mono text-accent-rose text-lg tracking-wide">-₹{fmt(data.totalLoanDisbursed)}</div>
             </div>
 
-            <div className="divider" />
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px' }}>
-              <span style={{ fontWeight: 700, fontSize: '1rem' }}>Total Outcome</span>
-              <span style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--danger)', fontSize: '1.15rem' }}>
+            <div className="my-6 h-px bg-app w-full" />
+            
+            <div className="flex justify-between items-center px-4">
+              <span className="font-medium text-lg text-primary">Total Outcome</span>
+              <span className="font-bold font-mono text-accent-rose text-2xl tracking-wide">
                 ₹{fmt(data.totalWithdrawals + data.totalLoanDisbursed)}
               </span>
             </div>
@@ -183,25 +187,29 @@ export default function AdminFinancials() {
       </div>
 
       {/* Transfer Volume */}
-      <div className="glass-panel-static fade-in delay-3">
-        <h3 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <ArrowLeftRight size={20} color="var(--accent-primary)" /> Transfer Volume
+      <div className="bg-card rounded-[40px] p-8 shadow-sm mb-12">
+        <h3 className="text-xl font-medium text-primary mb-6 flex items-center gap-2">
+          <ArrowLeftRight size={22} className="text-secondary" /> Network Volume
         </h3>
-        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '200px', padding: '16px', background: 'rgba(var(--accent-primary-rgb), 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(var(--accent-primary-rgb), 0.1)', textAlign: 'center' }}>
-            <div style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)', marginBottom: '6px' }}>Total Transfer Volume</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--accent-primary)' }}>₹{fmt(data.totalTransfers)}</div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-app border border-black/5 rounded-[24px] p-6 text-center">
+            <div className="text-[13px] text-secondary uppercase tracking-wider mb-2">Total Transfer Volume</div>
+            <div className="text-2xl font-bold font-mono tracking-wide text-primary">₹{fmt(data.totalTransfers)}</div>
           </div>
-          <div style={{ flex: 1, minWidth: '200px', padding: '16px', background: 'rgba(0,0,0,0.15)', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
-            <div style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)', marginBottom: '6px' }}>Number of Transfers</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{data.transferCount}</div>
+          
+          <div className="bg-elevated rounded-[24px] p-6 text-center">
+            <div className="text-[13px] text-secondary uppercase tracking-wider mb-2">Number of Transfers</div>
+            <div className="text-2xl font-bold font-mono tracking-wide text-primary">{data.transferCount}</div>
           </div>
-          <div style={{ flex: 1, minWidth: '200px', padding: '16px', background: 'rgba(var(--warning-rgb), 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(var(--warning-rgb), 0.1)', textAlign: 'center' }}>
-            <div style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)', marginBottom: '6px' }}>Pending Loan Requests</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--warning)' }}>₹{fmt(data.pendingLoanAmount)}</div>
+          
+          <div className="bg-accent-gold/5 border border-accent-gold/10 rounded-[24px] p-6 text-center">
+            <div className="text-[13px] text-secondary uppercase tracking-wider mb-2">Pending Loan Requests</div>
+            <div className="text-2xl font-bold font-mono tracking-wide text-accent-gold">₹{fmt(data.pendingLoanAmount)}</div>
           </div>
         </div>
       </div>
-    </>
+
+    </div>
   );
 }

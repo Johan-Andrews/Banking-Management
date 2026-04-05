@@ -1,0 +1,2 @@
+﻿node_modules/@fontsource-variable/geist/index.css
+src/index.css
