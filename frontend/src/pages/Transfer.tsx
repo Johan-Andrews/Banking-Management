@@ -155,6 +155,7 @@ export default function Transfer() {
             account_number: extAccountNumber,
             ifsc_code: extIfscCode,
             bank_name: extBankName,
+            bypass_cooling: true,
           }])
           .select()
           .single();

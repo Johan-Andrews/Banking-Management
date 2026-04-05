@@ -34,7 +34,11 @@ export default function AdminEmployees() {
   useEffect(() => { loadData(); }, []);
 
   const handleSave = async () => {
-    const payload = { ...form, managed_branch_id: form.role.toLowerCase() === 'manager' ? form.managed_branch_id || null : null };
+    const payload = { 
+      ...form, 
+      branch_id: form.branch_id || null,
+      managed_branch_id: form.role.toLowerCase() === 'manager' ? form.managed_branch_id || null : null 
+    };
     let error;
     if (editId) {
       ({ error } = await supabase.from('employee').update(payload).eq('employee_id', editId));
@@ -42,8 +46,8 @@ export default function AdminEmployees() {
       ({ error } = await supabase.from('employee').insert([payload]));
     }
     if (error) {
-      // Consider using a toast notification or error state
       console.error('Failed to save employee:', error.message);
+      alert(`Error saving employee: ${error.message}`);
       return;
     }
     setShowForm(false);

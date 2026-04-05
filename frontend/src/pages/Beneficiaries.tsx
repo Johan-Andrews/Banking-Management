@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { UserPlus, Clock, Trash2, Users, AlertCircle, Plus, CheckCircle2, Edit2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { UserPlus, Trash2, Users, AlertCircle, Plus, CheckCircle2, Edit2, ShieldCheck, ArrowRight, Clock } from 'lucide-react';
 import { formatDate } from '../lib/utils';
 
 export default function Beneficiaries() {
@@ -27,6 +27,28 @@ export default function Beneficiaries() {
   // OTP State
   const [otpStep, setOtpStep] = useState(false);
   const [otpInput, setOtpInput] = useState('');
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
+
+  const isCooling = (createdAt: string, bypass?: boolean) => {
+    if (bypass) return false;
+    const created = new Date(createdAt);
+    const diff = now.getTime() - created.getTime();
+    return diff < 24 * 60 * 60 * 1000;
+  };
+
+  const cooldownRemaining = (createdAt: string) => {
+    const created = new Date(createdAt);
+    const end = new Date(created.getTime() + 24 * 60 * 60 * 1000);
+    const diff = end.getTime() - now.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${mins}m`;
+  };
 
   async function loadData() {
     if (!customerId) return;
@@ -64,12 +86,12 @@ export default function Beneficiaries() {
     e.preventDefault();
     setStatusMsg({ text: '', type: '' });
 
-    if (!/^[0-9]{9,18}$/.test(accNum)) {
-      setStatusMsg({ text: 'Account number must be 9-18 digits.', type: 'danger' });
+    if (!/^[A-Z0-9]{9,18}$/i.test(accNum)) {
+      setStatusMsg({ text: 'Account number must be 9-18 alphanumeric characters.', type: 'danger' });
       return;
     }
-    if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc.toUpperCase())) {
-      setStatusMsg({ text: 'Invalid IFSC code format.', type: 'danger' });
+    if (!/^[A-Z0-9]{11}$/i.test(ifsc)) {
+      setStatusMsg({ text: 'Invalid IFSC code (must be 11 alphanumeric characters).', type: 'danger' });
       return;
     }
 
@@ -104,7 +126,7 @@ export default function Beneficiaries() {
     if (error) {
       setStatusMsg({ text: error.message, type: 'danger' });
     } else {
-      setStatusMsg({ text: 'Beneficiary added! 24-h cooling applies.', type: 'success' });
+      setStatusMsg({ text: 'Beneficiary added. Note: A 24-hour cooling period applies before transfers are enabled.', type: 'success' });
       setName(''); setAccNum(''); setIfsc(''); setBank(''); setLimit('10000');
       setOtpStep(false); setOtpInput('');
       loadData();
@@ -121,20 +143,7 @@ export default function Beneficiaries() {
     loadData();
   };
 
-  const isCooling = (createdAt: string) => {
-    const created = new Date(createdAt).getTime();
-    const now = Date.now();
-    return now - created < 24 * 60 * 60 * 1000;
-  };
 
-  const cooldownRemaining = (createdAt: string) => {
-    const created = new Date(createdAt).getTime();
-    const remaining = (created + 24 * 60 * 60 * 1000) - Date.now();
-    if (remaining <= 0) return '';
-    const hours = Math.floor(remaining / (1000 * 60 * 60));
-    const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${mins}m`;
-  };
 
   return (
     <div className="max-w-7xl mx-auto relative px-2 md:px-0">
@@ -243,16 +252,10 @@ export default function Beneficiaries() {
                   )}
                 </td>
                 <td className="py-4 text-center">
-                  {isCooling(b.created_at) ? (
-                    <div className="flex flex-col items-start gap-1">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-accent-gold/10 text-accent-gold tracking-wide">
-                        Cooling Period
-                      </span>
-                      <div className="flex items-center gap-1 text-[11px] text-secondary font-medium pl-1">
-                        <Clock size={10} />
-                        {cooldownRemaining(b.created_at)}
-                      </div>
-                    </div>
+                  {isCooling(b.created_at, b.bypass_cooling) ? (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-accent-gold/10 text-accent-gold tracking-wide gap-1" title={`Enabled in ${cooldownRemaining(b.created_at)}`}>
+                      <Clock size={12} /> Cooling ({cooldownRemaining(b.created_at)})
+                    </span>
                   ) : (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-accent-teal/10 text-accent-teal tracking-wide gap-1">
                       <CheckCircle2 size={12} /> Active
@@ -305,7 +308,7 @@ export default function Beneficiaries() {
             <input type="text" className="w-full bg-app lg:bg-app text-primary rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30" placeholder="e.g. Roopesh K" value={name} onChange={e => setName(e.target.value)} required />
           </div>
           <div className="space-y-1">
-            <label className="text-[13px] font-medium text-primary px-2">Account Number (9-18 digits)</label>
+            <label className="text-[13px] font-medium text-primary px-2">Account Number (9-18 alphanumeric)</label>
             <input type="text" className="w-full bg-app text-primary rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30" placeholder="e.g. 1234567890" value={accNum} onChange={e => setAccNum(e.target.value)} required />
           </div>
           <div className="space-y-1">
@@ -353,11 +356,16 @@ export default function Beneficiaries() {
         </form>
       )}
 
-      {!otpStep && (
-        <div className="mt-4 flex items-center gap-2 justify-center text-accent-gold text-[12px] font-medium">
-          <Clock size={14} /> 24-h cooling period will apply
+      {/* Cooling Period Info */}
+      <div className="mt-6 p-4 bg-shell rounded-2xl border border-app">
+        <div className="flex gap-3">
+          <Clock size={16} className="text-secondary shrink-0 mt-0.5" />
+          <div className="text-[12px] text-secondary leading-relaxed">
+            <span className="font-semibold text-primary block mb-1 uppercase tracking-wider text-[10px]">Cooling Period Policy (REQ-14B)</span>
+            As a security measure, a <span className="text-primary font-medium">24-hour cooling period</span> will apply from the moment a new beneficiary is verified. Transfers will be enabled automatically after this window.
+          </div>
         </div>
-      )}
+      </div>
     </div>
   </div>
 
