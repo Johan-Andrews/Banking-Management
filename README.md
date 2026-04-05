@@ -95,6 +95,8 @@ Banking-Management/
 
 4.  **Environment Variables**:
     Create a `.env.local` file in the `frontend` directory:
+    > ⚠️ **Security Warning**: Never commit `.env.local` to version control. Add it to `.gitignore` and use `.env.example` as a template.
+
     ```env
     VITE_SUPABASE_URL=your_supabase_project_url
     VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -132,7 +134,10 @@ erDiagram
 | **Transaction** | `transaction_id` | Ledger of all financial movements |
 | **Loan** | `loan_id` | Loan lifecycle (Pending to Closed) |
 | **Branch** | `branch_id` | Physical branch details |
-
+| **Login** | `login_id` | Authentication credentials for customers |
+| **Beneficiary** | `beneficiary_id` | Saved payees with transfer limits |
+| **Repayment Schedule** | `schedule_id` | EMI payment schedules for loans |
+| **Employee** | `employee_id` | Staff and admin user records |
 ---
 
 ## 👥 Prepared By
