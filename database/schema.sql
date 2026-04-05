@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS beneficiary (
     ifsc_code VARCHAR(20) NOT NULL,
     bank_name VARCHAR(100) NOT NULL,
     daily_transfer_limit DECIMAL(15, 2) DEFAULT 10000.00,
+    bypass_cooling BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -149,6 +150,7 @@ DECLARE
     v_today_transferred DECIMAL(15, 2);
     v_ben_daily_limit DECIMAL(15, 2);
     v_ben_created_at TIMESTAMP WITH TIME ZONE;
+    v_ben_bypass BOOLEAN;
 BEGIN
     -- Only process completed transactions
     IF NEW.status != 'Completed' THEN
@@ -216,11 +218,11 @@ BEGIN
 
         -- Beneficiary checks
         IF NEW.type = 'Transfer' AND NEW.beneficiary_id IS NOT NULL THEN
-            SELECT daily_transfer_limit, created_at INTO v_ben_daily_limit, v_ben_created_at
+            SELECT daily_transfer_limit, created_at, bypass_cooling INTO v_ben_daily_limit, v_ben_created_at, v_ben_bypass
             FROM beneficiary WHERE beneficiary_id = NEW.beneficiary_id;
 
             -- 24-hour cooling threshold validation (REQ-14B)
-            IF (NOW() - v_ben_created_at) < INTERVAL '24 hours' THEN
+            IF NOT v_ben_bypass AND (NOW() - v_ben_created_at) < INTERVAL '24 hours' THEN
                 RAISE EXCEPTION 'Beneficiary is in 24-hour cooling period. Transfers not allowed yet.';
             END IF;
 
@@ -727,7 +729,7 @@ BEGIN
 
   -- 9. Audit Logs (Restrictive)
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='audit_logs' AND policyname='audit_staff_access') THEN
-    CREATE POLICY audit_staff_access ON audit_logs TO authenticated USING (auth.jwt() ->> 'role' IN ('staff', 'manager', 'service_role'));
+    CREATE POLICY audit_staff_access ON audit_logs TO authenticated USING (auth.jwt() ->> 'role' IN ('staff', 'manager', 'service_role', 'admin'));
   END IF;
 
   -- 10. Branch (Public read for authenticated users)
@@ -737,12 +739,12 @@ BEGIN
 
   -- 11. Employee (Restrictive)
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='employee' AND policyname='employee_staff_access') THEN
-    CREATE POLICY employee_staff_access ON employee TO authenticated USING (auth.jwt() ->> 'role' IN ('staff', 'manager', 'service_role'));
+    CREATE POLICY employee_staff_access ON employee TO authenticated USING (auth.jwt() ->> 'role' IN ('staff', 'manager', 'service_role', 'admin'));
   END IF;
 
   -- 12. Password Reset OTP (No client access)
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='password_reset_otp' AND policyname='otp_internal_access') THEN
-    CREATE POLICY otp_internal_access ON password_reset_otp TO authenticated USING (auth.jwt() ->> 'role' IN ('service_role'));
+    CREATE POLICY otp_internal_access ON password_reset_otp TO authenticated USING (auth.jwt() ->> 'role' IN ('service_role', 'admin'));
   END IF;
 
 
